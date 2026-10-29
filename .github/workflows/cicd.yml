@@ -29,3 +29,69 @@ jobs:
     - name: Build with Maven
       run: mvn package --file pom.xml
 
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v7.0.2
+      with:
+        name: my-artifact
+        path: target/*.jar
+    
+    - name: Trivy FS Scan
+      run: | 
+        trivy fs --format table -o trivy-fs-report.html
+
+    - name: Official SonarQube Scan
+      # You may pin to the exact commit or the version.
+      # uses: SonarSource/sonarqube-scan-action@4d1dc0c91ee400dcf8a6dddf2f705ac36542e304
+      uses: SonarSource/sonarqube-scan-action@v8.4.0
+      env: 
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+
+    - name: SonarQube Quality Gate Check
+      # You may pin to the exact commit or the version.
+      # uses: SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa
+      uses: SonarSource/sonarqube-quality-gate-action@v1.2.1
+      timeout-minutes: 5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v4
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+    
+    - name: Build and push
+      run: |
+        docker build -t r25gajengi/boardgame:latest
+
+    - name: Trivy Image Scan
+      run: |
+        trivy image --format table -o trivy-image-report.html r25gajengi/boardgame:latest
+
+    - name: Push Docker Image
+      run: |
+        docker push r25gajengi/boardgame:latest
+
+    - name: Kubernetes CLI (kubectl)
+      # You may pin to the exact commit or the version.
+      # uses: tale/kubectl-action@a3b800d623aebc530384fe67de1b337332e23290
+      uses: tale/kubectl-action@v1
+      with: 
+         base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+    - run: |
+          kubectl apply -f deployment-service.yaml -n webapps
+          
+      
+
+        
+          
+
