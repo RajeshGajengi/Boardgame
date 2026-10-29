@@ -75,9 +75,9 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
     
-    - name: Build and push
+    - name: Build Docker image
       run: |
-        docker build -t r25gajengi/boardgame:latest
+        docker build -t r25gajengi/boardgame:latest .
 
     - name: Trivy Image Scan
       run: |
