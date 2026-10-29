@@ -37,7 +37,7 @@ jobs:
     
     - name: Trivy FS Scan
       run: | 
-        trivy fs --format table -o trivy-fs-report.html
+        trivy fs --format table -o trivy-fs-report.html .
 
     - name: Official SonarQube Scan
       # You may pin to the exact commit or the version.
