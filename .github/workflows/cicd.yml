@@ -38,8 +38,7 @@ jobs:
     - name: Trivy FS Scan
       run: | 
         trivy fs --format table -o trivy-fs-report.html .
-
-
+        
     - name: Install unzip
       run: |
         sudo apt-get update
